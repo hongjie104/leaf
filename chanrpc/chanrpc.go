@@ -3,9 +3,10 @@ package chanrpc
 import (
 	"errors"
 	"fmt"
-	"github.com/name5566/leaf/conf"
-	"github.com/name5566/leaf/log"
 	"runtime"
+
+	"github.com/hongjie104/leaf/conf"
+	"github.com/hongjie104/leaf/log"
 )
 
 // one server per goroutine (goroutine not safe)

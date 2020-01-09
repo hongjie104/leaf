@@ -1,10 +1,11 @@
 package cluster
 
 import (
-	"github.com/name5566/leaf/conf"
-	"github.com/name5566/leaf/network"
 	"math"
 	"time"
+
+	"github.com/hongjie104/leaf/conf"
+	"github.com/hongjie104/leaf/network"
 )
 
 var (
