@@ -1,6 +1,7 @@
 package json
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -167,8 +168,16 @@ func (p *Processor) Marshal(msg interface{}) ([][]byte, error) {
 		return nil, fmt.Errorf("message %v not registered", msgID)
 	}
 
+	id := make([]byte, 2)
+	// if p.littleEndian {
+	// TODO: 先写死，按小端的来
+	binary.LittleEndian.PutUint16(id, 104)
+	// } else {
+	// 	binary.BigEndian.PutUint16(id, 104)
+	// }
+
 	// data
 	m := map[string]interface{}{msgID: msg}
 	data, err := json.Marshal(m)
-	return [][]byte{data}, err
+	return [][]byte{id, data}, err
 }
