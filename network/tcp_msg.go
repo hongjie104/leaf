@@ -121,28 +121,32 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 		return errors.New("message too short")
 	}
 
-	msg := make([]byte, uint32(p.lenMsgLen)+msgLen)
+	msg := make([]byte, uint32(p.lenMsgLen)+msgLen+2)
 
-	// write len
+	// write len and Protocal
 	switch p.lenMsgLen {
 	case 1:
 		msg[0] = byte(msgLen)
 	case 2:
 		if p.littleEndian {
 			binary.LittleEndian.PutUint16(msg, uint16(msgLen))
+			binary.LittleEndian.PutUint16(msg, 104)
 		} else {
 			binary.BigEndian.PutUint16(msg, uint16(msgLen))
+			binary.BigEndian.PutUint16(msg, 104)
 		}
 	case 4:
 		if p.littleEndian {
 			binary.LittleEndian.PutUint32(msg, msgLen)
+			binary.LittleEndian.PutUint32(msg, 104)
 		} else {
 			binary.BigEndian.PutUint32(msg, msgLen)
+			binary.BigEndian.PutUint32(msg, 104)
 		}
 	}
 
 	// write data
-	l := p.lenMsgLen
+	l := p.lenMsgLen + 2
 	for i := 0; i < len(args); i++ {
 		copy(msg[l:], args[i])
 		l += len(args[i])
