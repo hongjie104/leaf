@@ -121,7 +121,8 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 		return errors.New("message too short")
 	}
 
-	msg := make([]byte, uint32(p.lenMsgLen)+msgLen+2)
+	msgLen += 2
+	msg := make([]byte, uint32(p.lenMsgLen)+msgLen)
 
 	// write len and Protocal
 	switch p.lenMsgLen {
