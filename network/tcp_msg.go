@@ -3,6 +3,7 @@ package network
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"math"
 )
@@ -108,11 +109,13 @@ func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 
 // goroutine safe
 func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
+	fmt.Println("1111111")
 	// get len
 	var msgLen uint32
 	for i := 0; i < len(args); i++ {
 		msgLen += uint32(len(args[i]))
 	}
+	fmt.Printf("222 msgLen = %d\n", msgLen)
 
 	// check len
 	if msgLen > p.maxMsgLen {
@@ -147,10 +150,12 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 
 	// write data
 	l := p.lenMsgLen + 2
+	fmt.Printf("33 l = %d\n", l)
 	for i := 0; i < len(args); i++ {
 		copy(msg[l:], args[i])
 		l += len(args[i])
 	}
+	fmt.Println("144444")
 
 	conn.Write(msg)
 
