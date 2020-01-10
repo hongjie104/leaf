@@ -101,31 +101,40 @@ func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 
 // goroutine safe
 func (p *Processor) Route(msg interface{}, userData interface{}) error {
+	fmt.Println("1111111111111")
 	// raw
 	if msgRaw, ok := msg.(MsgRaw); ok {
+		fmt.Println("2222222222222")
 		if msgRaw.msgID >= uint16(len(p.msgInfo)) {
 			return fmt.Errorf("message id %v not registered", msgRaw.msgID)
 		}
+		fmt.Println("3333333333333")
 		i := p.msgInfo[msgRaw.msgID]
 		if i.msgRawHandler != nil {
 			i.msgRawHandler([]interface{}{msgRaw.msgID, msgRaw.msgRawData, userData})
 		}
+		fmt.Println("4444444444")
 		return nil
 	}
 
+	fmt.Println("55555555555555")
 	// protobuf
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
 		return fmt.Errorf("message %s not registered", msgType)
 	}
+	fmt.Println("66666666666666666")
 	i := p.msgInfo[id]
 	if i.msgHandler != nil {
+		fmt.Println("7777777777777")
 		i.msgHandler([]interface{}{msg, userData})
 	}
 	if i.msgRouter != nil {
+		fmt.Println("888888888")
 		i.msgRouter.Go(msgType, msg, userData)
 	}
+	fmt.Println("999999999999")
 	return nil
 }
 

@@ -130,18 +130,14 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 		msg[0] = byte(msgLen)
 	case 2:
 		if p.littleEndian {
-			// binary.LittleEndian.PutUint16(msg, 104)
 			binary.LittleEndian.PutUint16(msg, uint16(msgLen))
 		} else {
-			// binary.BigEndian.PutUint16(msg, 104)
 			binary.BigEndian.PutUint16(msg, uint16(msgLen))
 		}
 	case 4:
 		if p.littleEndian {
-			// binary.LittleEndian.PutUint32(msg, 104)
 			binary.LittleEndian.PutUint32(msg, msgLen)
 		} else {
-			// binary.BigEndian.PutUint32(msg, 104)
 			binary.BigEndian.PutUint32(msg, msgLen)
 		}
 	}
