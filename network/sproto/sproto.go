@@ -7,9 +7,9 @@ import (
 	"math"
 	"reflect"
 
+	sproto "github.com/davyxu/gosproto"
 	"github.com/hongjie104/leaf/chanrpc"
 	"github.com/hongjie104/leaf/log"
-	sproto "github.com/xjdrew/gosproto"
 )
 
 // -------------------------
