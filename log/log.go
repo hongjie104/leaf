@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strconv"
@@ -61,7 +60,6 @@ func New(strLevel string, pathname string, flag int) (*Logger, error) {
 	HF := ""
 	if pathname != "" {
 		now := time.Now()
-		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		filename := fmt.Sprintf("%d%02d%02d_%02d_%02d_%02d.log",
 			now.Year(),
 			now.Month(),
@@ -69,7 +67,7 @@ func New(strLevel string, pathname string, flag int) (*Logger, error) {
 			now.Hour(),
 			now.Minute(),
 			now.Second())
-		full := path.Join(dir+"/"+pathname, filename)
+		full := path.Join(pathname, filename)
 		file, err := os.Create(full)
 		if err != nil {
 			return nil, err
@@ -112,7 +110,6 @@ func (logger *Logger) UpdateFileName() {
 	}
 
 	//换时间的直接更换文件
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	filename := fmt.Sprintf("%d%02d%02d_%02d_%02d_%02d.log",
 		now.Year(),
 		now.Month(),
@@ -121,7 +118,7 @@ func (logger *Logger) UpdateFileName() {
 		now.Minute(),
 		now.Second())
 
-	full := path.Join(dir+"/"+logger.pathname, filename)
+	full := path.Join(logger.pathname, filename)
 	file, err := os.Create(full)
 	if err != nil {
 		return
