@@ -155,7 +155,8 @@ func (logger *Logger) doPrintf(level int, printLevel string, format string, a ..
 	//isWin
 	_, file, line, _ := runtime.Caller(2)
 	format = printLevel + "[" + file + "][" + strconv.Itoa(line) + "]" + format
-	logger.OutputWithColor(level, 3, fmt.Sprintf(format, a...))
+	// logger.OutputWithColor(level, 3, fmt.Sprintf(format, a...))
+	logger.baseLogger.Output(3, fmt.Sprintf(format, a...))
 
 	if level == fatalLevel {
 		os.Exit(1)
