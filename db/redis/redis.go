@@ -10,6 +10,10 @@ var (
 	redisClient *red.Pool
 )
 
+// DialContext DialContext
+type DialContext struct {
+}
+
 // Dial 连接
 func Dial(host string, db int) {
 	// 从配置文件获取redis的ip以及db
@@ -42,6 +46,6 @@ func Dial(host string, db int) {
 }
 
 // Ref Ref
-func Ref() red.Conn {
+func (c *DialContext) Ref() red.Conn {
 	return redisClient.Get()
 }
