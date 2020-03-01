@@ -43,7 +43,20 @@ func Dial(host string, db int) *DialContext {
 	return c
 }
 
-// Ref Ref
-func (c *DialContext) Ref() red.Conn {
-	return c.redisClient.Get()
+// Exec Exec
+func (c *DialContext) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
+	con := c.redisClient.Get()
+	if err := con.Err(); err != nil {
+		return nil, err
+	}
+	defer con.Close()
+	parmas := make([]interface{}, 0)
+	parmas = append(parmas, key)
+
+	if len(args) > 0 {
+		for _, v := range args {
+			parmas = append(parmas, v)
+		}
+	}
+	return con.Do(cmd, parmas...)
 }
