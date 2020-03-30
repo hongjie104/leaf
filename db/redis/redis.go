@@ -12,7 +12,7 @@ type DialContext struct {
 }
 
 // Dial 连接
-func Dial(host string, db, maxIdle, maxActive int) *DialContext {
+func Dial(host, password string, db, maxIdle, maxActive int) *DialContext {
 	c := &DialContext{}
 	// 建立连接池
 	c.redisClient = &red.Pool{
@@ -30,6 +30,7 @@ func Dial(host string, db, maxIdle, maxActive int) *DialContext {
 				red.DialReadTimeout(time.Duration(1000)*time.Millisecond),
 				red.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
 				red.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
+				red.DialPassword(password),
 				red.DialDatabase(db),
 			)
 			if err != nil {
