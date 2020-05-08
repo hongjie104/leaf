@@ -4,10 +4,11 @@ var (
 	// LenStackBuf LenStackBuf
 	LenStackBuf = 4096
 
-	// log
-	// LogLevel string
-	// LogPath  string
-	// LogFlag  int
+	// LogPath LogPath
+	LogPath string
+
+	// RunMode RunMode
+	RunMode string
 
 	// ConsolePort ConsolePort
 	ConsolePort int
