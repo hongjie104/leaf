@@ -31,11 +31,11 @@ func New() *zap.SugaredLogger {
 func getLogWriter() zapcore.WriteSyncer {
 	now := time.Now()
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   fmt.Sprintf("./%s/%04d-%02d-%02d %02d:%02d:%02d", conf.LogPath, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()),
-		MaxSize:    10, // 在进行切割之前，日志文件的最大大小 以MB为单位
-		MaxBackups: 5,  // 保留旧文件的最大个数
-		MaxAge:     30, // 保留旧文件的最大天数
-		Compress:   false,
+		Filename: fmt.Sprintf("./%s/%04d-%02d-%02d %02d:%02d:%02d", conf.LogPath, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()),
+		MaxSize:  500, // 在进行切割之前，日志文件的最大大小 以MB为单位
+		// MaxBackups: 5,  // 保留旧文件的最大个数
+		MaxAge:   30, // 保留旧文件的最大天数
+		Compress: false,
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }
