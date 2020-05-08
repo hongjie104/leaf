@@ -54,10 +54,10 @@ func (p *Processor) Register(msg interface{}) uint16 {
 		log.Fatal("protobuf message pointer required")
 	}
 	if _, ok := p.msgID[msgType]; ok {
-		log.Fatal("message %s is already registered", msgType)
+		log.Fatalf("message %s is already registered", msgType)
 	}
 	if len(p.msgInfo) >= math.MaxUint16 {
-		log.Fatal("too many protobuf messages (max = %v)", math.MaxUint16)
+		log.Fatalf("too many protobuf messages (max = %v)", math.MaxUint16)
 	}
 
 	i := new(MsgInfo)
@@ -73,7 +73,7 @@ func (p *Processor) SetRouter(msg interface{}, msgRouter *chanrpc.Server) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
-		log.Fatal("message %s not registered", msgType)
+		log.Fatalf("message %s not registered", msgType)
 	}
 
 	p.msgInfo[id].msgRouter = msgRouter
@@ -84,7 +84,7 @@ func (p *Processor) SetHandler(msg interface{}, msgHandler MsgHandler) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
-		log.Fatal("message %s not registered", msgType)
+		log.Fatalf("message %s not registered", msgType)
 	}
 
 	p.msgInfo[id].msgHandler = msgHandler
@@ -93,7 +93,7 @@ func (p *Processor) SetHandler(msg interface{}, msgHandler MsgHandler) {
 // It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 	if id >= uint16(len(p.msgInfo)) {
-		log.Fatal("message id %v not registered", id)
+		log.Fatalf("message id %v not registered", id)
 	}
 
 	p.msgInfo[id].msgRawHandler = msgRawHandler
@@ -138,15 +138,11 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	// id
 	var id uint16
 	if p.littleEndian {
-		// log.Debug("little endian")
 		id = binary.LittleEndian.Uint16(data)
 	} else {
-		// log.Debug("big endian")
 		id = binary.BigEndian.Uint16(data)
 	}
 
-	// log.Debug("id=%v", id)
-	// log.Debug("msg info = %v, len = %v", p.msgInfo, len(p.msgInfo))
 	if id >= uint16(len(p.msgInfo)) {
 		return nil, fmt.Errorf("message id %v not registered", id)
 	}
@@ -180,7 +176,6 @@ func (p *Processor) Marshal(msg interface{}) ([][]byte, error) {
 		binary.BigEndian.PutUint16(id, _id)
 	}
 
-	// log.Debug("msg=%v", msg)
 	// data
 	data, err := sproto.Encode(msg)
 	return [][]byte{id, data}, err

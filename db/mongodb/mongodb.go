@@ -62,7 +62,7 @@ func Dial(url string, sessionNum int) (*DialContext, error) {
 func DialWithTimeout(url string, sessionNum int, dialTimeout time.Duration, timeout time.Duration) (*DialContext, error) {
 	if sessionNum <= 0 {
 		sessionNum = 100
-		log.Release("invalid sessionNum, reset to %v", sessionNum)
+		log.Infof("invalid sessionNum, reset to %v", sessionNum)
 	}
 
 	s, err := mgo.DialWithTimeout(url, dialTimeout)
@@ -91,7 +91,7 @@ func (c *DialContext) Close() {
 	for _, s := range c.sessions {
 		s.Close()
 		if s.ref != 0 {
-			log.Error("session ref = %v", s.ref)
+			log.Errorf("session ref = %v", s.ref)
 		}
 	}
 	c.Unlock()

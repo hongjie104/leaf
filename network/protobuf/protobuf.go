@@ -54,10 +54,10 @@ func (p *Processor) Register(msg proto.Message) uint16 {
 		log.Fatal("protobuf message pointer required")
 	}
 	if _, ok := p.msgID[msgType]; ok {
-		log.Fatal("message %s is already registered", msgType)
+		log.Fatalf("message %s is already registered", msgType)
 	}
 	if len(p.msgInfo) >= math.MaxUint16 {
-		log.Fatal("too many protobuf messages (max = %v)", math.MaxUint16)
+		log.Fatalf("too many protobuf messages (max = %v)", math.MaxUint16)
 	}
 
 	i := new(MsgInfo)
@@ -73,7 +73,7 @@ func (p *Processor) SetRouter(msg proto.Message, msgRouter *chanrpc.Server) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
-		log.Fatal("message %s not registered", msgType)
+		log.Fatalf("message %s not registered", msgType)
 	}
 
 	p.msgInfo[id].msgRouter = msgRouter
@@ -84,7 +84,7 @@ func (p *Processor) SetHandler(msg proto.Message, msgHandler MsgHandler) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
-		log.Fatal("message %s not registered", msgType)
+		log.Fatalf("message %s not registered", msgType)
 	}
 
 	p.msgInfo[id].msgHandler = msgHandler
@@ -93,7 +93,7 @@ func (p *Processor) SetHandler(msg proto.Message, msgHandler MsgHandler) {
 // It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 	if id >= uint16(len(p.msgInfo)) {
-		log.Fatal("message id %v not registered", id)
+		log.Fatalf("message id %v not registered", id)
 	}
 
 	p.msgInfo[id].msgRawHandler = msgRawHandler

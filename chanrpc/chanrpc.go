@@ -131,7 +131,7 @@ func (s *Server) exec(ci *CallInfo) (err error) {
 func (s *Server) Exec(ci *CallInfo) {
 	err := s.exec(ci)
 	if err != nil {
-		log.Error("%v", err)
+		log.Errorf("%v", err)
 	}
 }
 
@@ -356,9 +356,9 @@ func execCb(ri *RetInfo) {
 			if conf.LenStackBuf > 0 {
 				buf := make([]byte, conf.LenStackBuf)
 				l := runtime.Stack(buf, false)
-				log.Error("%v: %s", r, buf[:l])
+				log.Errorf("%v: %s", r, buf[:l])
 			} else {
-				log.Error("%v", r)
+				log.Errorf("%v", r)
 			}
 		}
 	}()

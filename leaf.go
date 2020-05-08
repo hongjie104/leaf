@@ -6,7 +6,6 @@ import (
 	"syscall"
 
 	"github.com/hongjie104/leaf/cluster"
-	"github.com/hongjie104/leaf/conf"
 	"github.com/hongjie104/leaf/console"
 	"github.com/hongjie104/leaf/log"
 	"github.com/hongjie104/leaf/module"
@@ -14,17 +13,10 @@ import (
 
 // Run Run
 func Run(mods ...module.Module) {
-	// logger
-	if conf.LogLevel != "" {
-		logger, err := log.New(conf.LogLevel, conf.LogPath, conf.LogFlag)
-		if err != nil {
-			panic(err)
-		}
-		log.Export(logger)
-		defer logger.Close()
-	}
+	log.Logger = log.New()
+	defer log.Logger.Sync()
 
-	log.Release("Leaf %v starting up", version)
+	log.Logger.Infof("Leaf %s starting up", version)
 
 	// module
 	for i := 0; i < len(mods); i++ {
@@ -42,7 +34,7 @@ func Run(mods ...module.Module) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
 	sig := <-c
-	log.Release("Leaf closing down (signal: %v)", sig)
+	log.Infof("Leaf closing down (signal: %v)", sig)
 	console.Destroy()
 	cluster.Destroy()
 	module.Destroy()

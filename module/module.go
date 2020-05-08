@@ -62,9 +62,9 @@ func destroy(m *module) {
 			if conf.LenStackBuf > 0 {
 				buf := make([]byte, conf.LenStackBuf)
 				l := runtime.Stack(buf, false)
-				log.Error("%v: %s", r, buf[:l])
+				log.Errorf("%v: %s", r, buf[:l])
 			} else {
-				log.Error("%v", r)
+				log.Errorf("%v", r)
 			}
 		}
 	}()

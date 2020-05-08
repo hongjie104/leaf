@@ -1,255 +1,111 @@
 package log
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
-	"os"
-	"path"
-	"runtime"
-	"runtime/debug"
-	"strconv"
-	"strings"
 	"time"
+
+	"github.com/natefinch/lumberjack"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// levels
-const (
-	debugLevel   = 0
-	releaseLevel = 1
-	errorLevel   = 2
-	fatalLevel   = 3
-)
+// Logger Logger
+var Logger *zap.SugaredLogger
 
-const (
-	printDebugLevel   = "[debug  ] "
-	printReleaseLevel = "[release] "
-	printErrorLevel   = "[error  ] "
-	printFatalLevel   = "[fatal  ] "
-)
+// New New
+func New() *zap.SugaredLogger {
+	writeSyncer := getLogWriter()
+	encoder := getEncoder()
+	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 
-type Logger struct {
-	level      int
-	baseLogger *log.Logger
-	baseFile   *os.File
-	HourFlag   string
-	pathname   string
-	flag       int
+	return zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1)).Sugar()
 }
 
-func New(strLevel string, pathname string, flag int) (*Logger, error) {
-	// level
-	var level int
-	switch strings.ToLower(strLevel) {
-	case "debug":
-		level = debugLevel
-	case "release":
-		level = releaseLevel
-	case "error":
-		level = errorLevel
-	case "fatal":
-		level = fatalLevel
-	default:
-		return nil, errors.New("unknown level: " + strLevel)
-	}
-
-	// logger
-	var baseLogger *log.Logger
-	var baseFile *os.File
-	HF := ""
-	if pathname != "" {
-		now := time.Now()
-		filename := fmt.Sprintf("%d%02d%02d_%02d_%02d_%02d.log",
-			now.Year(),
-			now.Month(),
-			now.Day(),
-			now.Hour(),
-			now.Minute(),
-			now.Second())
-		full := path.Join(pathname, filename)
-		file, err := os.Create(full)
-		if err != nil {
-			return nil, err
-		}
-
-		HF = fmt.Sprintf("%d%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour())
-
-		baseLogger = log.New(file, "", flag)
-		baseFile = file
-	} else {
-		baseLogger = log.New(os.Stdout, "", flag)
-	}
-
-	// new
-	logger := new(Logger)
-	logger.level = level
-	logger.baseLogger = baseLogger
-	logger.baseFile = baseFile
-	logger.HourFlag = HF
-	logger.pathname = pathname
-	logger.flag = flag
-
-	return logger, nil
-}
-func (logger *Logger) UpdateFileName() {
-
-	//非日期文件不变更
-	if logger.HourFlag == "" {
-		return
-	}
-
-	//没换时间则跳过
+func getLogWriter() zapcore.WriteSyncer {
 	now := time.Now()
-	HF := fmt.Sprintf("%d%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour())
-	if HF == logger.HourFlag {
-		finfo, _ := logger.baseFile.Stat()
-		if finfo.Size() < 1024*1024*1024 {
-			return
-		}
+	lumberJackLogger := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("./logs/%04d-%02d-%02d- %02d:%02d:%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()),
+		MaxSize:    10, // 在进行切割之前，日志文件的最大大小 以MB为单位
+		MaxBackups: 5,  // 保留旧文件的最大个数
+		MaxAge:     30, // 保留旧文件的最大天数
+		Compress:   false,
 	}
-
-	//换时间的直接更换文件
-	filename := fmt.Sprintf("%d%02d%02d_%02d_%02d_%02d.log",
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		now.Hour(),
-		now.Minute(),
-		now.Second())
-
-	full := path.Join(logger.pathname, filename)
-	file, err := os.Create(full)
-	if err != nil {
-		return
-	}
-
-	baseLogger := log.New(file, "", logger.flag)
-	logger.baseLogger = baseLogger
-	logger.baseFile = file
-	logger.HourFlag = HF
-
-	//logger.HourFlag
-
+	return zapcore.AddSync(lumberJackLogger)
 }
 
-// It's dangerous to call the method on logging
-func (logger *Logger) Close() {
-	if logger.baseFile != nil {
-		logger.baseFile.Close()
-	}
-
-	logger.baseLogger = nil
-	logger.baseFile = nil
+func getEncoder() zapcore.Encoder {
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	return zapcore.NewConsoleEncoder(encoderConfig)
 }
 
-func (logger *Logger) doPrintf(level int, printLevel string, format string, a ...interface{}) {
-	if level < logger.level {
-		return
-	}
-	if logger.baseLogger == nil {
-		panic("logger closed")
-	}
-	//更新文件名
-	logger.UpdateFileName()
-	//isWin
-	_, file, line, _ := runtime.Caller(2)
-	format = printLevel + "[" + file + "][" + strconv.Itoa(line) + "]" + format
-	// logger.OutputWithColor(level, 3, fmt.Sprintf(format, a...))
-	logger.baseLogger.Output(3, fmt.Sprintf(format, a...))
-
-	if level == fatalLevel {
-		os.Exit(1)
-	}
+// Debug Debug
+func Debug(args ...interface{}) {
+	Logger.Debug(args...)
 }
 
-func (logger *Logger) Debug(format string, a ...interface{}) {
-	logger.doPrintf(debugLevel, printDebugLevel, format, a...)
+// Debugf Debugf
+func Debugf(template string, args ...interface{}) {
+	Logger.Debugf(template, args...)
 }
 
-func (logger *Logger) Release(format string, a ...interface{}) {
-	logger.doPrintf(releaseLevel, printReleaseLevel, format, a...)
+// Info Info
+func Info(args ...interface{}) {
+	Logger.Info(args...)
 }
 
-func (logger *Logger) Error(format string, a ...interface{}) {
-	logger.doPrintf(errorLevel, printErrorLevel, format, a...)
-	_, file, line, _ := runtime.Caller(1)
-	logger.doPrintf(errorLevel, printErrorLevel, "%v %v", file, line)
-	debug.PrintStack()
+// Infof Infof
+func Infof(template string, args ...interface{}) {
+	Logger.Infof(template, args...)
 }
 
-func (logger *Logger) Fatal(format string, a ...interface{}) {
-	logger.doPrintf(fatalLevel, printFatalLevel, format, a...)
-	_, file, line, _ := runtime.Caller(1)
-	logger.doPrintf(errorLevel, printErrorLevel, "%v %v", file, line)
-	debug.PrintStack()
+// Warn Warn
+func Warn(args ...interface{}) {
+	Logger.Warn(args...)
 }
 
-var gLogger, _ = New("debug", "", log.LstdFlags)
-
-// It's dangerous to call the method on logging
-func Export(logger *Logger) {
-	if logger != nil {
-		gLogger = logger
-	}
+// Warnf Warnf
+func Warnf(template string, args ...interface{}) {
+	Logger.Warnf(template, args...)
 }
 
-func Debug(format string, a ...interface{}) {
-	gLogger.doPrintf(debugLevel, printDebugLevel, format, a...)
+// Error Error
+func Error(args ...interface{}) {
+	Logger.Error(args...)
 }
 
-func Release(format string, a ...interface{}) {
-	gLogger.doPrintf(releaseLevel, printReleaseLevel, format, a...)
+// Errorf Errorf
+func Errorf(template string, args ...interface{}) {
+	Logger.Errorf(template, args...)
 }
 
-func Error(format string, a ...interface{}) {
-	gLogger.doPrintf(errorLevel, printErrorLevel, format, a...)
+// DPanic DPanic
+func DPanic(args ...interface{}) {
+	Logger.DPanic(args...)
 }
 
-func Fatal(format string, a ...interface{}) {
-	gLogger.doPrintf(fatalLevel, printFatalLevel, format, a...)
+// DPanicf DPanicf
+func DPanicf(template string, args ...interface{}) {
+	Logger.DPanicf(template, args...)
 }
 
-func DebugJson(format string, a ...interface{}) {
-	for k, v := range a {
-		if btv, err := json.Marshal(v); err == nil {
-			a[k] = string(btv)
-		}
-	}
-	gLogger.doPrintf(releaseLevel, printDebugLevel, format, a...)
+// Panic Panic
+func Panic(args ...interface{}) {
+	Logger.Panic(args...)
 }
 
-func ReleaseJson(format string, a ...interface{}) {
-	for k, v := range a {
-		if btv, err := json.Marshal(v); err == nil {
-			a[k] = string(btv)
-		}
-	}
-	gLogger.doPrintf(releaseLevel, printReleaseLevel, format, a...)
+// Panicf Panicf
+func Panicf(template string, args ...interface{}) {
+	Logger.Panicf(template, args...)
 }
 
-func ErrorJson(format string, a ...interface{}) {
-	for k, v := range a {
-		if btv, err := json.Marshal(v); err == nil {
-			a[k] = string(btv)
-		}
-	}
-	gLogger.doPrintf(releaseLevel, printErrorLevel, format, a...)
+// Fatal Fatal
+func Fatal(args ...interface{}) {
+	Logger.Fatal(args...)
 }
 
-func FatalJson(format string, a ...interface{}) {
-	for k, v := range a {
-		if btv, err := json.Marshal(v); err == nil {
-			a[k] = string(btv)
-		}
-	}
-	gLogger.doPrintf(releaseLevel, printFatalLevel, format, a...)
-}
-
-func Close() {
-	gLogger.Close()
-}
-
-func isWin() bool {
-	return runtime.GOOS == "windows"
+// Fatalf Fatalf
+func Fatalf(template string, args ...interface{}) {
+	Logger.Fatalf(template, args...)
 }
