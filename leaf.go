@@ -38,4 +38,5 @@ func Run(mods ...module.Module) {
 	console.Destroy()
 	cluster.Destroy()
 	module.Destroy()
+	log.Info("Leaf closed success")
 }
