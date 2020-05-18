@@ -32,7 +32,7 @@ func getLogWriter() zapcore.WriteSyncer {
 	now := time.Now()
 	sep := string(os.PathSeparator)
 	lumberJackLogger := &lumberjack.Logger{
-		Filename: fmt.Sprintf(".%s%s%s%04d-%02d-%02d %02d:%02d:%02d", sep, conf.LogPath, sep, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()),
+		Filename: fmt.Sprintf(".%s%s%s%04d-%02d-%02d %02d%02d%02d", sep, conf.LogPath, sep, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()),
 		MaxSize:  500, // 在进行切割之前，日志文件的最大大小 以MB为单位
 		// MaxBackups: 5,  // 保留旧文件的最大个数
 		MaxAge:   30, // 保留旧文件的最大天数
