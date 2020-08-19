@@ -146,15 +146,12 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	if id >= uint16(len(p.msgInfo)) {
 		return nil, fmt.Errorf("message id %v not registered", id)
 	}
-	fmt.Printf("received msg id = %d\n", id)
 
 	// msg
 	i := p.msgInfo[id]
 	if i.msgRawHandler != nil {
-		fmt.Println("111111")
 		return MsgRaw{id, data[2:]}, nil
 	} else {
-		fmt.Println("2222222")
 		msg := reflect.New(i.msgType.Elem()).Interface()
 		_, err := sproto.Decode(data[2:], msg)
 		return msg, err
