@@ -109,7 +109,7 @@ func (a *agent) Run() {
 				break
 			}
 			if conf.RunMode == "debug" {
-				log.Debugf("receive msg = %v\n", msg)
+				log.Debugf("receive msg = %s\n", string(data))
 			}
 			err = a.gate.Processor.Route(msg, a)
 			if err != nil {
@@ -137,7 +137,7 @@ func (a *agent) WriteMsg(msg interface{}) {
 			return
 		}
 		if conf.RunMode == "debug" {
-			log.Debugf("send msg = %v\n", msg)
+			log.Debugf("send msg, id = %s, data = %s\n", string(data[0]), string(data[1]))
 		}
 		err = a.conn.WriteMsg(data...)
 		if err != nil {
