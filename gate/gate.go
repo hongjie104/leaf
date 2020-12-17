@@ -104,6 +104,7 @@ func (a *agent) Run() {
 				log.Debugf("unmarshal message error: %v", err)
 				break
 			}
+			log.Debugf("receive msg = %v\n", msg)
 			err = a.gate.Processor.Route(msg, a)
 			if err != nil {
 				log.Debugf("route message error: %v", err)
@@ -129,6 +130,7 @@ func (a *agent) WriteMsg(msg interface{}) {
 			log.Errorf("marshal message %v error: %v", reflect.TypeOf(msg), err)
 			return
 		}
+		log.Debugf("send msg = %v\n", msg)
 		err = a.conn.WriteMsg(data...)
 		if err != nil {
 			log.Errorf("write message %v error: %v", reflect.TypeOf(msg), err)
