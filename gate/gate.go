@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hongjie104/leaf/chanrpc"
-	"github.com/hongjie104/leaf/conf"
 	"github.com/hongjie104/leaf/log"
 	"github.com/hongjie104/leaf/network"
 )
@@ -108,9 +107,9 @@ func (a *agent) Run() {
 				log.Debugf("unmarshal message error: %v", err)
 				break
 			}
-			if conf.RunMode == "debug" {
-				log.Debugf("receive msg = %s\n", string(data))
-			}
+			// if conf.RunMode == "debug" {
+			// 	log.Debugf("receive msg = %s\n", string(data))
+			// }
 			err = a.gate.Processor.Route(msg, a)
 			if err != nil {
 				log.Debugf("route message error: %v", err)
@@ -136,9 +135,9 @@ func (a *agent) WriteMsg(msg interface{}) {
 			log.Errorf("marshal message %v error: %v", reflect.TypeOf(msg), err)
 			return
 		}
-		if conf.RunMode == "debug" {
-			log.Debugf("send msg, id = %s, data = %s\n", string(data[0]), string(data[1]))
-		}
+		// if conf.RunMode == "debug" {
+		// 	log.Debugf("send msg, id = %s, data = %s\n", string(data[0]), string(data[1]))
+		// }
 		err = a.conn.WriteMsg(data...)
 		if err != nil {
 			log.Errorf("write message %v error: %v", reflect.TypeOf(msg), err)
