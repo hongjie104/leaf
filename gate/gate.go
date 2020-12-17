@@ -10,6 +10,7 @@ import (
 	"github.com/hongjie104/leaf/network"
 )
 
+// Gate Gate
 type Gate struct {
 	MaxConnNum      int
 	PendingWriteNum int
@@ -29,6 +30,7 @@ type Gate struct {
 	LittleEndian bool
 }
 
+// Run Run
 func (gate *Gate) Run(closeSig chan bool) {
 	var wsServer *network.WSServer
 	if gate.WSAddr != "" {
@@ -82,6 +84,7 @@ func (gate *Gate) Run(closeSig chan bool) {
 	}
 }
 
+// OnDestroy OnDestroy
 func (gate *Gate) OnDestroy() {}
 
 type agent struct {
