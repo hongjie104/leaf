@@ -99,3 +99,7 @@ func (m *Map) LockRange(f func(interface{}, interface{})) {
 	defer m.Unlock()
 	m.UnsafeRange(f)
 }
+
+func (m *Map) Reset() {
+	m.m = make(map[interface{}]interface{})
+}
