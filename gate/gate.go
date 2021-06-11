@@ -1,8 +1,10 @@
 package gate
 
 import (
+	"fmt"
 	"net"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/hongjie104/leaf/chanrpc"
@@ -141,8 +143,30 @@ func (a *agent) WriteMsg(msg interface{}) {
 		err = a.conn.WriteMsg(data...)
 		if err != nil {
 			log.Errorf("write message %v error: %v", reflect.TypeOf(msg), err)
+			return
 		}
+		a.log(msg)
 	}
+}
+
+func (a *agent) log(m interface{}) {
+	// roleID := ""
+	// userData := a.UserData()
+	// if userData != nil {
+	// 	r := userData.(*data.Role)
+	// 	roleID = r.ID.Hex()
+	// }
+	t := reflect.TypeOf(m).Elem()
+	v := reflect.ValueOf(m).Elem()
+	key := ""
+	var tmp []string
+	values := ""
+	for i := 0; i < t.NumField(); i++ {
+		tmp = strings.Split(t.Field(i).Tag.Get("sproto"), ",")
+		key = strings.Split(tmp[len(tmp)-1], "=")[1]
+		values += fmt.Sprintf("key = %s val = %v,", key, v.FieldByName(t.Field(i).Name))
+	}
+	log.Debugf(fmt.Sprintf("[send msg],roleID = %s,msg=%s,%s", "", t.Name(), values))
 }
 
 func (a *agent) LocalAddr() net.Addr {
