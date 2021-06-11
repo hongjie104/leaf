@@ -157,16 +157,18 @@ func (a *agent) log(m interface{}) {
 	// 	roleID = r.ID.Hex()
 	// }
 	t := reflect.TypeOf(m).Elem()
-	v := reflect.ValueOf(m).Elem()
-	key := ""
-	var tmp []string
-	values := ""
-	for i := 0; i < t.NumField(); i++ {
-		tmp = strings.Split(t.Field(i).Tag.Get("sproto"), ",")
-		key = strings.Split(tmp[len(tmp)-1], "=")[1]
-		values += fmt.Sprintf("key = %s val = %v,", key, v.FieldByName(t.Field(i).Name))
+	if t.Name() != "S2C_SystemTime" {
+		v := reflect.ValueOf(m).Elem()
+		key := ""
+		var tmp []string
+		values := ""
+		for i := 0; i < t.NumField(); i++ {
+			tmp = strings.Split(t.Field(i).Tag.Get("sproto"), ",")
+			key = strings.Split(tmp[len(tmp)-1], "=")[1]
+			values += fmt.Sprintf("key = %s val = %v,", key, v.FieldByName(t.Field(i).Name))
+		}
+		log.Debugf(fmt.Sprintf("[send msg]msg=%s,%s", t.Name(), values))
 	}
-	log.Debugf(fmt.Sprintf("[send msg],roleID = %s,msg=%s,%s", "", t.Name(), values))
 }
 
 func (a *agent) LocalAddr() net.Addr {
